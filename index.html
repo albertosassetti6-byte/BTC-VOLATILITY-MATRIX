@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC Volatility Matrix · Advanced Straddle Suite</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+
+  <!-- Top Navigation & Live Clock Bar -->
+  <header class="top-bar">
+    <div class="container top-bar-content">
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span id="feed-status">Connecting CoinGecko Live API...</span>
+      </div>
+      <div class="time-display">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="local-time">--:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Bitcoin Options Suite
+      </div>
+      <h1>BTC VOLATILITY MATRIX</h1>
+      <p class="slogan">Capitalize on market swings regardless of direction. Model, calculate, and visualise Long & Short Straddle options strategies with real-time market data.</p>
+    </div>
+  </section>
+
+  <main class="container">
+    
+    <!-- Real-time Price Ticker -->
+    <section class="price-card">
+      <div class="price-info">
+        <div class="crypto-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f7931a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4h-4.5M9.5 6v12M11.5 6v2M11.5 16v2"/></svg>
+        </div>
+        <div>
+          <span class="label">Bitcoin Spot Price (BTC / USD)</span>
+          <div class="price-wrapper">
+            <span class="value" id="btc-price">Loading...</span>
+            <span class="change-tag" id="price-change">--</span>
+          </div>
+        </div>
+      </div>
+      <button id="refresh-btn" class="refresh-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Sync Now
+      </button>
+    </section>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Option Input Controls -->
+      <section class="card form-card">
+        <div class="card-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <h2>Option Parameters</h2>
+        </div>
+
+        <form id="straddle-form">
+          <!-- Strategy Switch -->
+          <div class="form-group">
+            <label>Strategy Direction</label>
+            <div class="strategy-selector">
+              <label class="radio-label">
+                <input type="radio" name="strategy" value="long" checked>
+                <span class="radio-button">Long Straddle</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="strategy" value="short">
+                <span class="radio-button">Short Straddle</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="strike">
+              Strike Price ($)
+              <button type="button" id="use-current-price" class="text-link">Set to Live Price</button>
+            </label>
+            <input type="number" id="strike" value="65000" step="50" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="call-premium">Call Premium ($)</label>
+              <input type="number" id="call-premium" value="2500" step="50" required>
+            </div>
+            <div class="form-group">
+              <label for="put-premium">Put Premium ($)</label>
+              <input type="number" id="put-premium" value="2300" step="50" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Calculate & Render Payoff</button>
+        </form>
+
+        <!-- KPI Summary -->
+        <div class="results-panel">
+          <div class="kpi-card">
+            <span class="kpi-label">Net Premium</span>
+            <span class="kpi-value" id="total-premium">$0.00</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Lower Breakeven</span>
+            <span class="kpi-value" id="breakeven-low">$0.00</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Upper Breakeven</span>
+            <span class="kpi-value" id="breakeven-high">$0.00</span>
+          </div>
+          <div class="kpi-card highlight">
+            <span class="kpi-label">Max Loss Risk</span>
+            <span class="kpi-value" id="max-risk">--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Payoff Diagram -->
+      <section class="card chart-card">
+        <div class="card-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <h2>Interactive Payoff Diagram</h2>
+        </div>
+        <div id="apex-payoff-chart" class="chart-wrapper"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Legal Disclaimer & Knowledge Hub Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-meta">
+        <p>Market data provided by <strong>biquote.io</strong> · MetaTrader 5 feed & CoinGecko API · Auto-refresh every 5 seconds</p>
+      </div>
+
+      <hr class="footer-divider">
+
+      <!-- Financial Disclaimer -->
+      <div class="disclaimer">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 3-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Risk Disclosure & Comprehensive Financial Disclaimer
+        </h3>
+        <p>
+          This application ("BTC Volatility Matrix") is provided solely for educational, analytical, and simulation purposes. No content, algorithm, calculation, or visualization within this tool constitutes investment advice, financial recommendations, legal or tax counsel, or an offer or solicitation to buy or sell securities, options, futures, or digital assets.
+        </p>
+        <p>
+          Options on cryptocurrencies are highly complex instruments subject to extreme volatility, time decay (Theta loss), liquidity risks, and structural pricing hazards. Trading options involves a high degree of risk and is not suitable for all investors. A <strong>Long Straddle</strong> strategy requires significant price movement to break even before option expiry, while a <strong>Short Straddle</strong> strategy exposes the writer (seller) to theoretically unlimited downside risk due to unhedged directional exposure.
+        </p>
+        <p>
+          Real-time price feeds integrated via biquote.io, MetaTrader 5, and CoinGecko API may experience latencies, outages, or inaccuracies. Neither the software authors nor service providers accept liability for any financial losses, lost profits, or operational damages resulting from relying on calculations produced by this tool. Always consult a qualified, independent financial advisor prior to deploying capital in live derivative markets.
+        </p>
+      </div>
+
+      <hr class="footer-divider">
+
+      <!-- Educational Content: What is a Straddle? -->
+      <section class="educational-section">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Options Academy: What is a Bitcoin Straddle?
+        </h3>
+        <p>
+          A <strong>Straddle</strong> is a neutral options trading strategy that involves purchasing (or selling) two options of different types—a Call option and a Put option—on the same underlying asset (e.g., Bitcoin), featuring the exact same <strong>Strike Price</strong> and the same <strong>Expiration Date</strong>.
+        </p>
+        
+        <div class="edu-grid">
+          <div class="edu-card">
+            <h4>1. Long Straddle (Buying Volatility)</h4>
+            <p><strong>Goal:</strong> Profit from large price swings in <em>either direction</em>.</p>
+            <p>You simultaneously buy 1 Call and 1 Put option at the current spot price. This strategy pays off when Bitcoin experiences massive volatility (e.g., macroeconomic announcements, regulatory approvals, or sudden technical breakouts). You make money if BTC moves far enough above the upper breakeven or below the lower breakeven to cover the total premium paid.</p>
+            <ul>
+              <li><strong>Max Profit:</strong> Unlimited (Upwards) / Substantial (Downwards to $0).</li>
+              <li><strong>Max Loss:</strong> Capped at total premium paid ($Call + $Put).</li>
+            </ul>
+          </div>
+
+          <div class="edu-card">
+            <h4>2. Short Straddle (Selling Volatility)</h4>
+            <p><strong>Goal:</strong> Profit from market stagnation and time decay.</p>
+            <p>You simultaneously sell 1 Call and 1 Put option at the current spot price. This strategy pays off when Bitcoin remains range-bound and calm. You collect the upfront premium from buyers, hoping that options expire worthless due to low volatility or time decay (Theta).</p>
+            <ul>
+              <li><strong>Max Profit:</strong> Limited to the net premium collected.</li>
+              <li><strong>Max Loss:</strong> Theoretically unlimited if BTC explodes upward or crashes.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
